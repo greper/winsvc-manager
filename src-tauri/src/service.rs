@@ -63,7 +63,7 @@ fn parse_powershell_output(text: &str) -> Result<Vec<ServiceInfo>, String> {
                 services.push(ServiceInfo {
                     name,
                     display_name,
-                    status,
+                    status: status.to_string(),
                 });
             }
         }
