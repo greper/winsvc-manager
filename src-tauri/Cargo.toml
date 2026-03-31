@@ -1,6 +1,6 @@
 [package]
-name = "winservice-manager"
-version = "0.0.0"
+name = "winsvc-manager"
+version = "1.0.0"
 description = "Windows Service Manager using NSSM"
 authors = ["you"]
 license = ""
@@ -9,7 +9,9 @@ edition = "2021"
 
 [package.metadata.tauri-winres]
 FileDescription = "NSSM Service Manager"
-ProductName = "winservice-manager"
+ProductName = "winsvc-manager"
+LegalCopyright = "Copyright (C) 2026"
+OriginalFilename = "winsvc-manager.exe"
 
 [build-dependencies]
 tauri-build = { version = "2.0", features = [] }

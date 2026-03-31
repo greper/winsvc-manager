@@ -9,7 +9,7 @@
     >
       <a-table-column title="服务名称" data-index="name" key="name" width="200">
         <template #default="{ record }">
-          <a-tag :color="record.is_nssm ? 'blue' : 'default'">
+          <a-tag :color="record.is_nssm ? 'blue' : 'default'" :title="record.image_path || ''">
             {{ record.name }}
           </a-tag>
         </template>
@@ -23,7 +23,7 @@
           />
         </template>
       </a-table-column>
-      <a-table-column title="操作" key="actions" width="300" fixed="right">
+      <a-table-column title="操作" key="actions" width="350" fixed="right">
         <template #default="{ record }">
           <a-space>
             <a-button
@@ -44,6 +44,14 @@
             </a-button>
             <a-button type="link" size="small" @click="handleRestart(record)">
               重启
+            </a-button>
+            <a-button
+              v-if="record.is_nssm"
+              type="link"
+              size="small"
+              @click="handleViewLog(record)"
+            >
+              日志
             </a-button>
             <a-popconfirm
               title="确定要卸载此服务吗？"
@@ -76,6 +84,7 @@ const props = defineProps<Props>();
 const emit = defineEmits<{
   refresh: [];
   log: [log: { time: string; message: string; type: 'info' | 'success' | 'error' | 'warning' }];
+  viewLog: [serviceName: string];
 }>();
 
 const statusMap: Record<string, string> = {
@@ -148,6 +157,10 @@ async function handleRemove(service: ServiceInfo) {
     message.error(`卸载失败: ${e}`);
     emitLog(`卸载 ${service.name} 失败: ${e}`, 'error');
   }
+}
+
+function handleViewLog(service: ServiceInfo) {
+  emit('viewLog', service.name);
 }
 </script>
 

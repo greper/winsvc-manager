@@ -50,7 +50,7 @@ pub async fn list_all_services_cmd() -> Result<Vec<FrontendServiceInfo>, String>
             is_nssm: false,
             name: s.name,
             display_name: s.display_name,
-            image_path: None,
+            image_path: s.image_path,
         })
         .collect())
 }
@@ -58,22 +58,20 @@ pub async fn list_all_services_cmd() -> Result<Vec<FrontendServiceInfo>, String>
 #[tauri::command]
 pub async fn list_nssm_services_cmd() -> Result<Vec<FrontendServiceInfo>, String> {
     let services = enumerate_services()?;
-    let mut result = Vec::new();
-    for s in services {
-        let image_path = get_service_image_path(&s.name).ok();
-        let is_nssm = image_path
-            .as_ref()
-            .map(|p| p.to_lowercase().contains("nssm"))
-            .unwrap_or(false);
-        if is_nssm {
-            result.push(FrontendServiceInfo {
-                status: s.status,
-                is_nssm: true,
-                name: s.name,
-                display_name: s.display_name,
-                image_path,
-            });
-        }
-    }
-    Ok(result)
+    Ok(services
+        .into_iter()
+        .filter(|s| s.is_nssm_service())
+        .map(|s| FrontendServiceInfo {
+            status: s.status,
+            is_nssm: true,
+            name: s.name,
+            display_name: s.display_name,
+            image_path: s.image_path,
+        })
+        .collect())
+}
+
+#[tauri::command]
+pub async fn get_service_log_cmd(service_name: String, lines: usize) -> Result<String, String> {
+    get_service_log(&service_name, lines)
 }

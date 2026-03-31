@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2.0.0",
-  "productName": "winservice-manager",
-  "version": "0.1.0",
-  "identifier": "com.tauri.winservice-manager",
+  "productName": "winsvc-manager",
+  "version": "1.0.0",
+  "identifier": "com.tauri.winsvc-manager",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:5173",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "NSSM Service Manager",
+        "title": "NSSM Service Manager v1.0.0",
         "width": 1000,
         "height": 700,
         "label": "main"
@@ -31,6 +31,9 @@
       "certificateThumbprint": null,
       "digestAlgorithm": "sha256",
       "timestampUrl": "",
+      "webviewInstallMode": {
+        "type": "downloadBootstrapper"
+      },
       "nsis": {
         "installerIcon": "icons/icon.ico",
         "languages": ["SimpChinese", "English"],

@@ -2,7 +2,10 @@
   <div class="app-container">
     <div class="main-card">
       <div class="card-header">
-        <h3 class="card-title">NSSM Service Manager</h3>
+        <div class="header-left">
+          <h3 class="card-title">NSSM Service Manager</h3>
+          <span class="version-tag">v1.0.0</span>
+        </div>
         <a-space>
           <a-button type="primary" @click="showInstallDialog">
             <template #icon><PlusOutlined /></template>
@@ -22,6 +25,7 @@
             :loading="loading"
             @refresh="loadServices"
             @log="addLog"
+            @view-log="showServiceLog"
           />
         </a-tab-pane>
         <a-tab-pane key="all" tab="所有服务">
@@ -59,6 +63,11 @@
       @success="handleInstallSuccess"
       @log="addLog"
     />
+
+    <ServiceLogDialog
+      v-model:open="serviceLogDialogVisible"
+      :service-name="selectedServiceName"
+    />
   </div>
 </template>
 
@@ -69,6 +78,7 @@ import { ReloadOutlined, PlusOutlined } from '@ant-design/icons-vue';
 import { invoke } from '@tauri-apps/api/core';
 import ServiceList from './components/ServiceList.vue';
 import InstallDialog from './components/InstallDialog.vue';
+import ServiceLogDialog from './components/ServiceLogDialog.vue';
 import type { ServiceInfo } from './types';
 
 interface LogEntry {
@@ -82,6 +92,8 @@ const nssmServices = ref<ServiceInfo[]>([]);
 const allServices = ref<ServiceInfo[]>([]);
 const loading = ref(false);
 const installDialogVisible = ref(false);
+const serviceLogDialogVisible = ref(false);
+const selectedServiceName = ref('');
 const logs = ref<LogEntry[]>([]);
 
 function getTimestamp() {
@@ -132,8 +144,16 @@ function handleInstallSuccess() {
   loadServices();
 }
 
+function showServiceLog(serviceName: string) {
+  selectedServiceName.value = serviceName;
+  serviceLogDialogVisible.value = true;
+}
+
+// Expose showServiceLog for child components
+defineExpose({ showServiceLog });
+
 onMounted(() => {
-  addLog({ time: getTimestamp(), message: 'NSSM Service Manager 启动', type: 'info' });
+  addLog({ time: getTimestamp(), message: 'NSSM Service Manager v1.0.0 启动', type: 'info' });
   loadServices();
 });
 </script>
@@ -167,10 +187,25 @@ onMounted(() => {
   margin-bottom: 16px;
 }
 
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .card-title {
   margin: 0;
   font-size: 16px;
   font-weight: 600;
+}
+
+.version-tag {
+  background: #f0f0f0;
+  color: #666;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: monospace;
 }
 
 .service-tabs {

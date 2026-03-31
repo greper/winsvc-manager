@@ -141,3 +141,48 @@ pub fn restart_service(service_name: &str) -> Result<(), String> {
     run_nssm(&["restart", name])?;
     Ok(())
 }
+
+pub fn get_service_log(service_name: &str, lines: usize) -> Result<String, String> {
+    let name = service_name.trim();
+    // NSSM stores logs in stdout/stderr files configured during installation
+    // We can use nssm get to find the log file paths, then read them
+    let stdout_log = run_nssm(&["get", name, "AppStdout"]).ok();
+    let stderr_log = run_nssm(&["get", name, "AppStderr"]).ok();
+
+    let mut logs = Vec::new();
+
+    if let Some(ref path) = stderr_log {
+        if let Ok(content) = read_last_lines(path.trim(), lines) {
+            if !content.is_empty() {
+                logs.push(format!("=== stderr ===\n{}", content));
+            }
+        }
+    }
+
+    if let Some(ref path) = stdout_log {
+        if let Ok(content) = read_last_lines(path.trim(), lines) {
+            if !content.is_empty() {
+                logs.push(format!("=== stdout ===\n{}", content));
+            }
+        }
+    }
+
+    if logs.is_empty() {
+        return Ok("No log files configured for this service.".to_string());
+    }
+
+    Ok(logs.join("\n\n"))
+}
+
+fn read_last_lines(path: &str, count: usize) -> Result<String, String> {
+    use std::fs;
+    let content =
+        fs::read_to_string(path).map_err(|e| format!("Failed to read log file: {}", e))?;
+    let lines: Vec<&str> = content.lines().collect();
+    let start = if lines.len() > count {
+        lines.len() - count
+    } else {
+        0
+    };
+    Ok(lines[start..].join("\n"))
+}

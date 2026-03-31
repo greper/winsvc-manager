@@ -23,7 +23,7 @@
 
 ### 安装
 
-1. 运行 `winservice-manager_0.1.0_x64-setup.exe`
+1. 运行 `winsvc-manager_0.1.0_x64-setup.exe`
 2. 按照安装向导完成安装
 3. **以管理员身份运行**（管理 Windows 服务需要管理员权限）
 
