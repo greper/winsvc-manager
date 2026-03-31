@@ -1,0 +1,11 @@
+node_modules/
+dist/
+src-tauri/target/
+src-tauri/gen/
+src-tauri/icons/icon1.ico
+src-tauri/icons/icon2.ico
+*.log
+.env
+.env.local
+test_install.bat
+test_service.bat
