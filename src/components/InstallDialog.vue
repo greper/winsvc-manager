@@ -80,22 +80,32 @@ function parseExePathWithArgs(input: string): { exePath: string; args: string } 
   input = input.trim();
   if (!input) return { exePath: '', args: '' };
 
-  // 处理引号包裹的路径: "C:\Program Files\app.exe" --arg1 --arg2
+  // 处理双引号包裹的路径: "C:\Program Files\app.exe" --arg1 --arg2
   if (input.startsWith('"')) {
     const endQuote = input.indexOf('"', 1);
     if (endQuote > 0) {
-      const exePath = input.substring(1, endQuote);
+      const exePath = input.substring(1, endQuote).trim();
       const args = input.substring(endQuote + 1).trim();
       return { exePath, args };
     }
   }
 
-  // 没有引号，按第一个空格分割
+  // 处理单引号包裹的路径
+  if (input.startsWith("'")) {
+    const endQuote = input.indexOf("'", 1);
+    if (endQuote > 0) {
+      const exePath = input.substring(1, endQuote).trim();
+      const args = input.substring(endQuote + 1).trim();
+      return { exePath, args };
+    }
+  }
+
+  // 没有引号，按第一个空格分割，但智能识别路径
   const spaceIndex = input.indexOf(' ');
   if (spaceIndex > 0) {
     const possiblePath = input.substring(0, spaceIndex);
     // 检查是否是有效路径（包含路径分隔符或扩展名）
-    if (possiblePath.includes('\\') || possiblePath.includes('/') || possiblePath.match(/\.(exe|bat|cmd|com|ps1)$/i)) {
+    if (possiblePath.includes('\\') || possiblePath.includes('/') || possiblePath.match(/\.(exe|bat|cmd|com|ps1|msi)$/i)) {
       return {
         exePath: possiblePath,
         args: input.substring(spaceIndex + 1).trim()

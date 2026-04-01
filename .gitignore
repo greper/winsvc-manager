@@ -9,3 +9,4 @@ src-tauri/icons/icon2.ico
 .env.local
 test_install.bat
 test_service.bat
+.history/

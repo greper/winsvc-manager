@@ -114,6 +114,20 @@ pub fn install_service(
         cmd_args.push(a);
     }
     run_nssm(&cmd_args)?;
+    
+    // Configure logging
+    let log_dir = std::env::temp_dir().join("nssm_logs");
+    let _ = std::fs::create_dir_all(&log_dir);
+    
+    let stdout_path = log_dir.join(format!("{}_stdout.log", name));
+    let stderr_path = log_dir.join(format!("{}_stderr.log", name));
+    
+    let _ = run_nssm(&["set", name, "AppStdout", stdout_path.to_str().unwrap_or("")]);
+    let _ = run_nssm(&["set", name, "AppStderr", stderr_path.to_str().unwrap_or("")]);
+    let _ = run_nssm(&["set", name, "AppStdoutRotation", "1"]);
+    let _ = run_nssm(&["set", name, "AppStderrRotation", "1"]);
+    let _ = run_nssm(&["set", name, "AppRotateFiles", "10"]);
+    
     Ok(())
 }
 
@@ -144,33 +158,97 @@ pub fn restart_service(service_name: &str) -> Result<(), String> {
 
 pub fn get_service_log(service_name: &str, lines: usize) -> Result<String, String> {
     let name = service_name.trim();
-    // NSSM stores logs in stdout/stderr files configured during installation
-    // We can use nssm get to find the log file paths, then read them
+    
+    let mut info = Vec::new();
+    info.push(format!("📋 Service: {}", name));
+    
+    // Try to get current log configuration
     let stdout_log = run_nssm(&["get", name, "AppStdout"]).ok();
     let stderr_log = run_nssm(&["get", name, "AppStderr"]).ok();
-
+    
+    let stdout_path = stdout_log.as_ref().map(|p| p.trim()).unwrap_or("");
+    let stderr_path = stderr_log.as_ref().map(|p| p.trim()).unwrap_or("");
+    
+    info.push(format!("📄 stdout: {}", if stdout_path.is_empty() { "(not set)" } else { stdout_path }));
+    info.push(format!("📄 stderr: {}", if stderr_path.is_empty() { "(not set)" } else { stderr_path }));
+    info.push(String::new());
+    
+    // Check file status
+    let mut file_status = Vec::new();
+    
+    if !stderr_path.is_empty() {
+        match std::fs::metadata(stderr_path) {
+            Ok(meta) => {
+                file_status.push(format!("✅ stderr file exists ({} bytes)", meta.len()));
+            }
+            Err(_) => {
+                file_status.push("❌ stderr file does not exist".to_string());
+            }
+        }
+    }
+    
+    if !stdout_path.is_empty() {
+        match std::fs::metadata(stdout_path) {
+            Ok(meta) => {
+                file_status.push(format!("✅ stdout file exists ({} bytes)", meta.len()));
+            }
+            Err(_) => {
+                file_status.push("❌ stdout file does not exist".to_string());
+            }
+        }
+    }
+    
+    if !file_status.is_empty() {
+        info.push("📊 File status:".to_string());
+        for status in file_status {
+            info.push(format!("   {}", status));
+        }
+        info.push(String::new());
+    }
+    
+    // Try to read logs if paths are available
     let mut logs = Vec::new();
-
-    if let Some(ref path) = stderr_log {
-        if let Ok(content) = read_last_lines(path.trim(), lines) {
+    
+    if !stderr_path.is_empty() {
+        if let Ok(content) = read_last_lines(stderr_path, lines) {
             if !content.is_empty() {
                 logs.push(format!("=== stderr ===\n{}", content));
             }
         }
     }
-
-    if let Some(ref path) = stdout_log {
-        if let Ok(content) = read_last_lines(path.trim(), lines) {
+    
+    if !stdout_path.is_empty() {
+        if let Ok(content) = read_last_lines(stdout_path, lines) {
             if !content.is_empty() {
                 logs.push(format!("=== stdout ===\n{}", content));
             }
         }
     }
-
+    
     if logs.is_empty() {
-        return Ok("No log files configured for this service.".to_string());
+        let mut message = info.join("\n");
+        message.push_str("⚠️ No log content found.\n\n");
+        message.push_str("💡 Next steps:\n");
+        
+        let stdout_exists = !stdout_path.is_empty() && std::path::Path::new(stdout_path).exists();
+        let stderr_exists = !stderr_path.is_empty() && std::path::Path::new(stderr_path).exists();
+        
+        if stdout_exists || stderr_exists {
+            message.push_str("   • ✅ Log files exist, but are empty\n");
+            message.push_str("   • The service may not produce any output\n");
+        } else if !stdout_path.is_empty() || !stderr_path.is_empty() {
+            message.push_str("   • 🔄 Logs configured, but files not created yet\n");
+            message.push_str("   • ⚠️ FULL STOP then START the service (not restart!)\n");
+        } else {
+            message.push_str("   • Logs not configured\n");
+            message.push_str("   • Reinstall the service to enable logging\n");
+        }
+        
+        message.push_str("   • Ensure the application produces console output\n");
+        
+        return Ok(message);
     }
-
+    
     Ok(logs.join("\n\n"))
 }
 

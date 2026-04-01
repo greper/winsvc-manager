@@ -15,6 +15,7 @@ pub struct ServiceInfo {
 }
 
 impl ServiceInfo {
+    #[allow(dead_code)]
     pub fn status_cn(&self) -> &'static str {
         match self.status.to_uppercase().as_str() {
             "RUNNING" => "运行中",
@@ -27,7 +28,10 @@ impl ServiceInfo {
     pub fn is_nssm_service(&self) -> bool {
         self.image_path
             .as_ref()
-            .map(|p| p.to_lowercase().contains("nssm"))
+            .map(|p| {
+                let lower_path = p.to_lowercase();
+                lower_path.contains("nssm.exe") || lower_path.contains("nssm")
+            })
             .unwrap_or(false)
     }
 }
@@ -39,12 +43,14 @@ pub fn enumerate_services() -> Result<Vec<ServiceInfo>, String> {
         "-WindowStyle", "Hidden",
         "-NoProfile",
         "-Command",
-        "$OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8; \
-         [Console]::InputEncoding = [System.Text.Encoding]::UTF8; \
-         chcp 65001 > $null; \
-         Get-CimInstance Win32_Service | ForEach-Object { \
-             $path = if ($_.PathName) { $_.PathName.Replace('|', 'PIPE') } else { '' }; \
-             Write-Output ($_.Name + '|' + $_.DisplayName + '|' + $_.State.ToString() + '|' + $path) \
+        "[Console]::OutputEncoding = [System.Text.Encoding]::UTF8; \
+         $services = Get-CimInstance Win32_Service; \
+         foreach ($s in $services) { \
+             $name = if ($s.Name) { $s.Name.Replace('|', '[PIPE]') } else { '' }; \
+             $displayName = if ($s.DisplayName) { $s.DisplayName.Replace('|', '[PIPE]') } else { '' }; \
+             $state = if ($s.State) { $s.State.ToString() } else { 'Unknown' }; \
+             $path = if ($s.PathName) { $s.PathName.Replace('|', '[PIPE]') } else { '' }; \
+             Write-Output \"$name|$displayName|$state|$path\" \
          }",
     ]);
 
@@ -55,12 +61,13 @@ pub fn enumerate_services() -> Result<Vec<ServiceInfo>, String> {
         .output()
         .map_err(|e| format!("Failed to run powershell: {}", e))?;
 
+    let text = String::from_utf8_lossy(&output.stdout);
+    
     if !output.status.success() {
         let err = String::from_utf8_lossy(&output.stderr);
-        return Err(format!("powershell failed: {}", err));
+        return Err(format!("powershell failed: {}\nStdout: {}", err, text));
     }
 
-    let text = String::from_utf8_lossy(&output.stdout);
     parse_powershell_output(&text)
 }
 
@@ -74,10 +81,10 @@ fn parse_powershell_output(text: &str) -> Result<Vec<ServiceInfo>, String> {
         }
         let parts: Vec<&str> = line.splitn(4, '|').collect();
         if parts.len() == 4 {
-            let name = parts[0].trim().to_string();
-            let display_name = parts[1].trim().to_string();
+            let name = parts[0].trim().replace("[PIPE]", "|");
+            let display_name = parts[1].trim().replace("[PIPE]", "|");
             let status_raw = parts[2].trim().to_uppercase();
-            let image_path_raw = parts[3].trim();
+            let image_path_raw = parts[3].trim().replace("[PIPE]", "|");
 
             let status = match status_raw.as_str() {
                 "RUNNING" => "running",
@@ -86,11 +93,10 @@ fn parse_powershell_output(text: &str) -> Result<Vec<ServiceInfo>, String> {
                 _ => "unknown",
             };
 
-            // 恢复被替换的管道符
             let image_path = if image_path_raw.is_empty() {
                 None
             } else {
-                Some(image_path_raw.replace("PIPE", "|"))
+                Some(image_path_raw)
             };
 
             if !name.is_empty() {

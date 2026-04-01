@@ -108,54 +108,54 @@ function emitLog(msg: string, type: 'info' | 'success' | 'error' | 'warning') {
 }
 
 async function handleStart(service: ServiceInfo) {
-  emitLog(`启动服务: ${service.name}`, 'info');
+  emitLog(`启动服务：${service.name}`, 'info');
   try {
     await invoke('start_service_cmd', { serviceName: service.name });
     message.success('服务启动成功');
     emitLog(`服务 ${service.name} 启动成功`, 'success');
     emit('refresh');
   } catch (e) {
-    message.error(`启动失败: ${e}`);
-    emitLog(`启动 ${service.name} 失败: ${e}`, 'error');
+    message.error(`启动失败：${e}`);
+    emitLog(`启动 ${service.name} 失败：${e}`, 'error');
   }
 }
 
 async function handleStop(service: ServiceInfo) {
-  emitLog(`停止服务: ${service.name}`, 'info');
+  emitLog(`停止服务：${service.name}`, 'info');
   try {
     await invoke('stop_service_cmd', { serviceName: service.name });
     message.success('服务停止成功');
     emitLog(`服务 ${service.name} 停止成功`, 'success');
     emit('refresh');
   } catch (e) {
-    message.error(`停止失败: ${e}`);
-    emitLog(`停止 ${service.name} 失败: ${e}`, 'error');
+    message.error(`停止失败：${e}`);
+    emitLog(`停止 ${service.name} 失败：${e}`, 'error');
   }
 }
 
 async function handleRestart(service: ServiceInfo) {
-  emitLog(`重启服务: ${service.name}`, 'info');
+  emitLog(`重启服务：${service.name}`, 'info');
   try {
     await invoke('restart_service_cmd', { serviceName: service.name });
     message.success('服务重启成功');
     emitLog(`服务 ${service.name} 重启成功`, 'success');
     emit('refresh');
   } catch (e) {
-    message.error(`重启失败: ${e}`);
-    emitLog(`重启 ${service.name} 失败: ${e}`, 'error');
+    message.error(`重启失败：${e}`);
+    emitLog(`重启 ${service.name} 失败：${e}`, 'error');
   }
 }
 
 async function handleRemove(service: ServiceInfo) {
-  emitLog(`卸载服务: ${service.name}`, 'warning');
+  emitLog(`卸载服务：${service.name}`, 'warning');
   try {
     await invoke('remove_service_cmd', { serviceName: service.name });
     message.success('服务卸载成功');
     emitLog(`服务 ${service.name} 卸载成功`, 'success');
     emit('refresh');
   } catch (e) {
-    message.error(`卸载失败: ${e}`);
-    emitLog(`卸载 ${service.name} 失败: ${e}`, 'error');
+    message.error(`卸载失败：${e}`);
+    emitLog(`卸载 ${service.name} 失败：${e}`, 'error');
   }
 }
 

@@ -63,13 +63,15 @@ watch(visible, (val) => {
 
 async function loadLog() {
   if (!props.serviceName) return;
+  logContent.value = '';
   try {
-    logContent.value = await invoke<string>('get_service_log_cmd', {
+    const result = await invoke<string>('get_service_log_cmd', {
       serviceName: props.serviceName,
       lines: lineCount.value,
     });
+    logContent.value = result || '暂无日志内容';
   } catch (e) {
-    logContent.value = `获取日志失败: ${e}`;
+    logContent.value = `获取日志失败: ${(e as Error).message || String(e)}`;
   }
 }
 </script>

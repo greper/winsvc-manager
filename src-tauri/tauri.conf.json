@@ -13,9 +13,11 @@
     "windows": [
       {
         "title": "NSSM Service Manager v1.0.0",
-        "width": 1000,
-        "height": 700,
-        "label": "main"
+        "width": 1200,
+        "height": 800,
+        "label": "main",
+        "minWidth": 1000,
+        "minHeight": 700
       }
     ],
     "security": {
