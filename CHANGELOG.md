@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.1.0](https://github.com/greper/winsvc-manager/compare/v1.0.0...v1.1.0) (2026-04-01)
+
+
+### Features
+
+* 添加发布前自动编译检查 ([cde4129](https://github.com/greper/winsvc-manager/commit/cde4129129e0b12cc4d45254e1b89a89cc4529be))
+
+
+### Bug Fixes
+
+* 修复 Tauri 2.x NSIS 配置 ([93133c4](https://github.com/greper/winsvc-manager/commit/93133c47b9f31cf2d26cef3520d93cb9bcac9c83))
+
 ## 1.0.0 (2026-04-01)
 
 
