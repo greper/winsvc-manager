@@ -2,9 +2,9 @@
   <a-spin :spinning="loading" class="service-list-container">
     <a-table
       :data-source="services"
-      :pagination="{ pageSize: 20, size: 'small' }"
+      :pagination="{ pageSize: 20, size: 'small', showTotal: (total: number) => `共 ${total} 条` }"
       row-key="name"
-      :scroll="{ x: 800, y: 'calc(100vh - 420px)' }"
+      :scroll="{ x: 800, y: 'calc(100vh - 480px)' }"
       size="small"
     >
       <a-table-column title="服务名称" data-index="name" key="name" width="200">

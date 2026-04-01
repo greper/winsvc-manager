@@ -1,82 +1,85 @@
 <template>
-  <div class="app-container">
-    <div class="main-card">
-      <div class="card-header">
-        <div class="header-left">
-          <h3 class="card-title">Windows Service Manager</h3>
-          <span class="version-tag">v{{ appVersion }}</span>
+  <a-config-provider :locale="zhCNLocale">
+    <div class="app-container">
+      <div class="main-card">
+        <div class="card-header">
+          <div class="header-left">
+            <h3 class="card-title">Windows Service Manager</h3>
+            <span class="version-tag">v{{ appVersion }}</span>
+          </div>
+          <a-space>
+            <a-button type="primary" @click="showInstallDialog">
+              <template #icon><PlusOutlined /></template>
+              安装新服务
+            </a-button>
+            <a-button danger @click="stopAllServices">
+              停止所有服务
+            </a-button>
+            <a-button @click="loadServices">
+              <template #icon><ReloadOutlined /></template>
+              刷新
+            </a-button>
+          </a-space>
         </div>
-        <a-space>
-          <a-button type="primary" @click="showInstallDialog">
-            <template #icon><PlusOutlined /></template>
-            安装新服务
-          </a-button>
-          <a-button danger @click="stopAllServices">
-            停止所有服务
-          </a-button>
-          <a-button @click="loadServices">
-            <template #icon><ReloadOutlined /></template>
-            刷新
-          </a-button>
-        </a-space>
+
+        <a-tabs v-model:activeKey="activeTab" class="service-tabs">
+          <a-tab-pane key="nssm" tab="已安装服务">
+            <ServiceList
+              :services="nssmServices"
+              :loading="loading"
+              @refresh="loadServices"
+              @log="addLog"
+              @view-log="showServiceLog"
+            />
+          </a-tab-pane>
+          <a-tab-pane key="all" tab="所有服务">
+            <ServiceList
+              :services="allServices"
+              :loading="loading"
+              @refresh="loadServices"
+              @log="addLog"
+            />
+          </a-tab-pane>
+        </a-tabs>
       </div>
 
-      <a-tabs v-model:activeKey="activeTab" class="service-tabs">
-        <a-tab-pane key="nssm" tab="已安装服务">
-          <ServiceList
-            :services="nssmServices"
-            :loading="loading"
-            @refresh="loadServices"
-            @log="addLog"
-            @view-log="showServiceLog"
-          />
-        </a-tab-pane>
-        <a-tab-pane key="all" tab="所有服务">
-          <ServiceList
-            :services="allServices"
-            :loading="loading"
-            @refresh="loadServices"
-            @log="addLog"
-          />
-        </a-tab-pane>
-      </a-tabs>
-    </div>
-
-    <div class="log-card">
-      <div class="log-header">
-        <h3 class="card-title">操作日志</h3>
-        <a-button size="small" @click="clearLogs">清空</a-button>
-      </div>
-      <div class="log-container">
-        <div
-          v-for="(log, index) in logs"
-          :key="index"
-          class="log-item"
-          :class="`log-${log.type}`"
-        >
-          <span class="log-time">{{ log.time }}</span>
-          <span class="log-message">{{ log.message }}</span>
+      <div class="log-card">
+        <div class="log-header">
+          <h3 class="card-title">操作日志</h3>
+          <a-button size="small" @click="clearLogs">清空</a-button>
         </div>
-        <div v-if="logs.length === 0" class="log-empty">暂无日志</div>
+        <div class="log-container">
+          <div
+            v-for="(log, index) in logs"
+            :key="index"
+            class="log-item"
+            :class="`log-${log.type}`"
+          >
+            <span class="log-time">{{ log.time }}</span>
+            <span class="log-message">{{ log.message }}</span>
+          </div>
+          <div v-if="logs.length === 0" class="log-empty">暂无日志</div>
+        </div>
       </div>
+
+      <InstallDialog
+        v-model:open="installDialogVisible"
+        @success="handleInstallSuccess"
+        @log="addLog"
+      />
+
+      <ServiceLogDialog
+        v-model:open="serviceLogDialogVisible"
+        :service-name="selectedServiceName"
+      />
     </div>
-
-    <InstallDialog
-      v-model:open="installDialogVisible"
-      @success="handleInstallSuccess"
-      @log="addLog"
-    />
-
-    <ServiceLogDialog
-      v-model:open="serviceLogDialogVisible"
-      :service-name="selectedServiceName"
-    />
-  </div>
+  </a-config-provider>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { message, Modal } from 'ant-design-vue';
+import zhCNLocale from 'ant-design-vue/es/locale/zh_CN';
 import { ReloadOutlined, PlusOutlined } from '@ant-design/icons-vue';
 import { invoke } from '@tauri-apps/api/core';
 import { getVersion } from '@tauri-apps/api/app';
@@ -326,7 +329,7 @@ onMounted(async () => {
   border-radius: 8px;
   padding: 16px;
   margin-top: 16px;
-  max-height: 200px;
+  height: 200px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
