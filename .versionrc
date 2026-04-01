@@ -20,7 +20,7 @@
     {
       "filename": "src-tauri/Cargo.toml",
       "type": "toml",
-      "updater": "scripts/version-updater.js"
+      "updater": "scripts/version-updater.cjs"
     },
     {
       "filename": "src-tauri/tauri.conf.json",
@@ -35,7 +35,7 @@
     {
       "filename": "src-tauri/Cargo.toml",
       "type": "toml",
-      "updater": "scripts/version-updater.js"
+      "updater": "scripts/version-updater.cjs"
     },
     {
       "filename": "src-tauri/tauri.conf.json",

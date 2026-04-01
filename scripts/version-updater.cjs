@@ -1,6 +1,4 @@
 #!/usr/bin/env node
-const fs = require('fs');
-const path = require('path');
 
 module.exports.readVersion = function (contents) {
   const versionMatch = contents.match(/^version\s*=\s*"([^"]+)"/m);
