@@ -13,7 +13,12 @@
 
 ## 截图
 
-![主界面](docs/screenshots/main.png)
+
+![主界面](docs/screenshots/start2.png)
+
+![主界面](docs/screenshots/start1.png)
+
+![主界面](docs/screenshots/start3.png)
 
 ## 快速开始
 

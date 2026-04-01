@@ -1,4 +1,4 @@
-@echo off
+
 echo Test service is running...
 echo Press Ctrl+C to stop.
 :loop
