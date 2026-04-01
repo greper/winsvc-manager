@@ -3,7 +3,7 @@
     <div class="main-card">
       <div class="card-header">
         <div class="header-left">
-          <h3 class="card-title">NSSM Service Manager</h3>
+          <h3 class="card-title">Windows Service Manager</h3>
           <span class="version-tag">v{{ appVersion }}</span>
         </div>
         <a-space>
@@ -22,7 +22,7 @@
       </div>
 
       <a-tabs v-model:activeKey="activeTab" class="service-tabs">
-        <a-tab-pane key="nssm" tab="NSSM 服务">
+        <a-tab-pane key="nssm" tab="已安装服务">
           <ServiceList
             :services="nssmServices"
             :loading="loading"
@@ -76,7 +76,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { message } from 'ant-design-vue';
+import { message, Modal } from 'ant-design-vue';
 import { ReloadOutlined, PlusOutlined } from '@ant-design/icons-vue';
 import { invoke } from '@tauri-apps/api/core';
 import { getVersion } from '@tauri-apps/api/app';
@@ -186,14 +186,69 @@ function showServiceLog(serviceName: string) {
 // Expose showServiceLog for child components
 defineExpose({ showServiceLog });
 
+async function checkAndUpgradeNssm() {
+  try {
+    const result = await invoke<{ needs_upgrade: boolean; is_first_install: boolean; running_services_count: number }>('check_nssm_upgrade_cmd');
+    
+    if (!result.needs_upgrade) {
+      return;
+    }
+    
+    if (result.is_first_install) {
+      await invoke<{ success: boolean; restarted_services: string[] }>('perform_nssm_upgrade_cmd');
+      return;
+    }
+    
+    if (result.running_services_count === 0) {
+      await invoke<{ success: boolean; restarted_services: string[] }>('perform_nssm_upgrade_cmd');
+      addLog({ time: getTimestamp(), message: 'NSSM 升级成功', type: 'success' });
+      message.success('NSSM 升级成功');
+      return;
+    }
+    
+    return new Promise<void>((resolve) => {
+      Modal.confirm({
+        title: 'NSSM 需要升级',
+        content: `检测到 NSSM 有新版本。当前有 ${result.running_services_count} 个正在运行的服务，升级期间将临时停止这些服务，升级完成后会自动恢复。是否继续？`,
+        okText: '继续升级',
+        cancelText: '稍后再说',
+        async onOk() {
+          try {
+            addLog({ time: getTimestamp(), message: `正在停止 ${result.running_services_count} 个服务以升级 NSSM...`, type: 'warning' });
+            message.loading({ content: '正在升级 NSSM...', duration: 0 });
+            const upgradeResult = await invoke<{ success: boolean; restarted_services: string[] }>('perform_nssm_upgrade_cmd');
+            message.destroy();
+            if (upgradeResult.success) {
+              const restartedCount = upgradeResult.restarted_services.length;
+              addLog({ time: getTimestamp(), message: `NSSM 升级成功，已自动恢复 ${restartedCount} 个服务`, type: 'success' });
+              message.success(`NSSM 升级成功，已恢复 ${restartedCount} 个服务`);
+            }
+          } catch (e) {
+            message.error(`NSSM 升级失败: ${e}`);
+            addLog({ time: getTimestamp(), message: `NSSM 升级失败: ${e}`, type: 'error' });
+          }
+          resolve();
+        },
+        onCancel() {
+          addLog({ time: getTimestamp(), message: '用户取消了 NSSM 升级', type: 'warning' });
+          resolve();
+        },
+      });
+    });
+  } catch (e) {
+    addLog({ time: getTimestamp(), message: `检查 NSSM 升级失败: ${e}`, type: 'error' });
+  }
+}
+
 onMounted(async () => {
   try {
     appVersion.value = await getVersion();
   } catch {
     appVersion.value = '1.0.0';
   }
-  addLog({ time: getTimestamp(), message: `NSSM Service Manager v${appVersion.value} 启动`, type: 'info' });
-  loadServices();
+  addLog({ time: getTimestamp(), message: `Windows Service Manager v${appVersion.value} 启动`, type: 'info' });
+  await loadServices();
+  await checkAndUpgradeNssm();
 });
 </script>
 

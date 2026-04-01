@@ -123,3 +123,14 @@ MIT License
 ## 贡献
 
 欢迎提交 Issue 和 Pull Request！
+
+
+## 我的其他项目（求Star）
+
+| 项目名称 | stars  | 项目描述  | 
+| --------- |--------- |----------- |
+| [certd](https://github.com/certd/certd/) | <img alt="GitHub stars" src="https://img.shields.io/github/stars/certd/certd?logo=github"/> | 全自动证书管理工具，免费证书申请，自动部署，让你的网站永不过期 |
+| [fast-crud](https://gitee.com/fast-crud/fast-crud/)     | <img alt="GitHub stars" src="https://img.shields.io/github/stars/fast-crud/fast-crud?logo=github"/>   | 基于vue3的crud快速开发框架                 |  
+| [dev-sidecar](https://github.com/docmirror/dev-sidecar/) | <img alt="GitHub stars" src="https://img.shields.io/github/stars/docmirror/dev-sidecar?logo=github"/> | 直连访问github工具，无需FQ，解决github无法访问的问题 |
+| [winsvc-manager](https://github.com/greper/winsvc-manager/) | <img alt="GitHub stars" src="https://img.shields.io/github/stars/greper/winsvc-manager?logo=github"/> | 可视化包装应用成为一个Windows服务，使其后台运行 |
+

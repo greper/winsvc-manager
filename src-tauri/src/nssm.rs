@@ -7,7 +7,17 @@ use std::os::windows::process::CommandExt;
 #[cfg(windows)]
 const CREATE_NO_WINDOW: u32 = 0x08000000;
 
+pub fn get_program_data_dir() -> PathBuf {
+    let program_data =
+        std::env::var("PROGRAMDATA").unwrap_or_else(|_| r"C:\ProgramData".to_string());
+    PathBuf::from(program_data).join("winsvc-manager")
+}
+
 pub fn get_nssm_path() -> PathBuf {
+    get_program_data_dir().join("nssm.exe")
+}
+
+fn get_bundled_nssm_path() -> PathBuf {
     #[cfg(target_arch = "x86_64")]
     let arch_dir = "win64";
 
@@ -22,13 +32,27 @@ pub fn get_nssm_path() -> PathBuf {
     let nssm_path = exe_dir.join("resources").join(arch_dir).join("nssm.exe");
 
     if !nssm_path.exists() {
-        let resource_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
             .join("resources")
-            .join(arch_dir);
-        resource_dir.join("nssm.exe")
+            .join(arch_dir)
+            .join("nssm.exe")
     } else {
         nssm_path
     }
+}
+
+fn compute_md5(path: &PathBuf) -> Result<String, String> {
+    use std::fs::File;
+    use std::io::Read;
+
+    let mut file = File::open(path).map_err(|e| format!("Failed to open file: {}", e))?;
+    let mut buffer = Vec::new();
+    file.read_to_end(&mut buffer)
+        .map_err(|e| format!("Failed to read file: {}", e))?;
+
+    let mut context = md5::Context::new();
+    context.consume(&buffer);
+    Ok(format!("{:x}", context.compute()))
 }
 
 pub fn run_nssm(args: &[&str]) -> Result<String, String> {
@@ -393,4 +417,70 @@ fn read_last_lines(path: &str, count: usize) -> Result<String, String> {
     } else {
         Ok(result)
     }
+}
+
+pub enum NssmUpgradeStatus {
+    NoActionNeeded,
+    FirstInstall,
+    UpgradeNeeded,
+}
+
+pub fn check_nssm_upgrade_needed() -> Result<NssmUpgradeStatus, String> {
+    let program_data_dir = get_program_data_dir();
+    let target_nssm = program_data_dir.join("nssm.exe");
+    let bundled_nssm = get_bundled_nssm_path();
+
+    if !bundled_nssm.exists() {
+        return Err("Bundled nssm.exe not found".to_string());
+    }
+
+    let bundled_md5 = compute_md5(&bundled_nssm)?;
+
+    if !target_nssm.exists() {
+        return Ok(NssmUpgradeStatus::FirstInstall);
+    }
+
+    let target_md5 = compute_md5(&target_nssm)?;
+
+    if bundled_md5 == target_md5 {
+        Ok(NssmUpgradeStatus::NoActionNeeded)
+    } else {
+        Ok(NssmUpgradeStatus::UpgradeNeeded)
+    }
+}
+
+pub fn perform_nssm_upgrade() -> Result<Vec<String>, String> {
+    let program_data_dir = get_program_data_dir();
+    std::fs::create_dir_all(&program_data_dir)
+        .map_err(|e| format!("Failed to create program data directory: {}", e))?;
+
+    let nssm_services = crate::service::enumerate_services()
+        .map_err(|e| format!("Failed to enumerate services: {}", e))?;
+
+    let running_nssm: Vec<_> = nssm_services
+        .into_iter()
+        .filter(|s| s.is_nssm_service() && s.status.to_uppercase() == "RUNNING")
+        .map(|s| s.name.clone())
+        .collect();
+
+    for name in &running_nssm {
+        let _ = stop_service(name);
+    }
+
+    std::thread::sleep(std::time::Duration::from_secs(2));
+
+    let bundled_nssm = get_bundled_nssm_path();
+    let target_nssm = program_data_dir.join("nssm.exe");
+
+    std::fs::copy(&bundled_nssm, &target_nssm)
+        .map_err(|e| format!("Failed to copy nssm.exe: {}", e))?;
+
+    let mut started_services = Vec::new();
+    for name in &running_nssm {
+        if start_service(name).is_ok() {
+            started_services.push(name.clone());
+        }
+    }
+
+    Ok(started_services)
 }

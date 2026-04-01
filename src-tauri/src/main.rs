@@ -17,7 +17,9 @@ fn main() {
             restart_service_cmd,
             list_all_services_cmd,
             list_nssm_services_cmd,
-            get_service_log_cmd
+            get_service_log_cmd,
+            check_nssm_upgrade_cmd,
+            perform_nssm_upgrade_cmd
         ])
         .plugin(tauri_plugin_dialog::init())
         .run(tauri::generate_context!())
