@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2.0.0",
   "productName": "winsvc-manager",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "identifier": "com.tauri.winsvc-manager",
   "build": {
     "beforeDevCommand": "npm run dev",
@@ -26,9 +26,16 @@
   },
   "bundle": {
     "active": true,
-    "targets": ["nsis"],
-    "icon": ["icons/icon.ico"],
-    "resources": ["resources/win32", "resources/win64"],
+    "targets": [
+      "nsis"
+    ],
+    "icon": [
+      "icons/icon.ico"
+    ],
+    "resources": [
+      "resources/win32",
+      "resources/win64"
+    ],
     "windows": {
       "certificateThumbprint": null,
       "digestAlgorithm": "sha256",
@@ -38,7 +45,10 @@
       },
       "nsis": {
         "installerIcon": "icons/icon.ico",
-        "languages": ["SimpChinese", "English"],
+        "languages": [
+          "SimpChinese",
+          "English"
+        ],
         "installMode": "perMachine",
         "displayLanguageSelector": false,
         "oneClick": false,
