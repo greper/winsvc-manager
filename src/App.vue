@@ -4,7 +4,7 @@
       <div class="card-header">
         <div class="header-left">
           <h3 class="card-title">NSSM Service Manager</h3>
-          <span class="version-tag">v1.0.0</span>
+          <span class="version-tag">v{{ appVersion }}</span>
         </div>
         <a-space>
           <a-button type="primary" @click="showInstallDialog">
@@ -79,6 +79,7 @@ import { ref, onMounted } from 'vue';
 import { message } from 'ant-design-vue';
 import { ReloadOutlined, PlusOutlined } from '@ant-design/icons-vue';
 import { invoke } from '@tauri-apps/api/core';
+import { getVersion } from '@tauri-apps/api/app';
 import ServiceList from './components/ServiceList.vue';
 import InstallDialog from './components/InstallDialog.vue';
 import ServiceLogDialog from './components/ServiceLogDialog.vue';
@@ -98,6 +99,7 @@ const installDialogVisible = ref(false);
 const serviceLogDialogVisible = ref(false);
 const selectedServiceName = ref('');
 const logs = ref<LogEntry[]>([]);
+const appVersion = ref('');
 
 function getTimestamp() {
   const now = new Date();
@@ -184,8 +186,13 @@ function showServiceLog(serviceName: string) {
 // Expose showServiceLog for child components
 defineExpose({ showServiceLog });
 
-onMounted(() => {
-  addLog({ time: getTimestamp(), message: 'NSSM Service Manager v1.0.0 启动', type: 'info' });
+onMounted(async () => {
+  try {
+    appVersion.value = await getVersion();
+  } catch {
+    appVersion.value = '1.0.0';
+  }
+  addLog({ time: getTimestamp(), message: `NSSM Service Manager v${appVersion.value} 启动`, type: 'info' });
   loadServices();
 });
 </script>
