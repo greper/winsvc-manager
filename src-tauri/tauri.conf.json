@@ -39,7 +39,13 @@
       "nsis": {
         "installerIcon": "icons/icon.ico",
         "languages": ["SimpChinese", "English"],
-        "installMode": "perMachine"
+        "installMode": "perMachine",
+        "displayLanguageSelector": false,
+        "oneClick": false,
+        "allowToChangeInstallationDirectory": true,
+        "deleteAppDataOnUninstall": false,
+        "createDesktopShortcut": true,
+        "createStartMenuShortcut": true
       }
     }
   },

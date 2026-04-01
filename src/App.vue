@@ -11,6 +11,9 @@
             <template #icon><PlusOutlined /></template>
             安装新服务
           </a-button>
+          <a-button danger @click="stopAllServices">
+            停止所有服务
+          </a-button>
           <a-button @click="loadServices">
             <template #icon><ReloadOutlined /></template>
             刷新
@@ -142,6 +145,35 @@ function showInstallDialog() {
 function handleInstallSuccess() {
   addLog({ time: getTimestamp(), message: '服务安装成功', type: 'success' });
   loadServices();
+}
+
+async function stopAllServices() {
+  if (nssmServices.value.length === 0) {
+    message.info('没有运行的 NSSM 服务');
+    return;
+  }
+  
+  try {
+    await message.loading({
+      content: '正在停止所有服务...',
+      duration: 0,
+    });
+    
+    const stopPromises = nssmServices.value.map(async (service) => {
+      try {
+        await invoke('stop_service_cmd', { serviceName: service.name });
+        addLog({ time: getTimestamp(), message: `已停止服务: ${service.name}`, type: 'success' });
+      } catch (e) {
+        addLog({ time: getTimestamp(), message: `停止服务 ${service.name} 失败: ${e}`, type: 'error' });
+      }
+    });
+    
+    await Promise.all(stopPromises);
+    message.success('所有服务停止操作完成');
+    loadServices();
+  } catch (e) {
+    message.error(`停止服务失败: ${e}`);
+  }
 }
 
 function showServiceLog(serviceName: string) {
