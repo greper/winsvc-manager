@@ -115,8 +115,9 @@ pub fn install_service(
     }
     run_nssm(&cmd_args)?;
     
-    // Configure logging
-    let log_dir = std::env::temp_dir().join("nssm_logs");
+    // Configure logging to ProgramData
+    let program_data = std::env::var("PROGRAMDATA").unwrap_or_else(|_| r"C:\ProgramData".to_string());
+    let log_dir = std::path::Path::new(&program_data).join("winsvc-manager").join("logs");
     let _ = std::fs::create_dir_all(&log_dir);
     
     let stdout_path = log_dir.join(format!("{}_stdout.log", name));
@@ -127,6 +128,11 @@ pub fn install_service(
     let _ = run_nssm(&["set", name, "AppStdoutRotation", "1"]);
     let _ = run_nssm(&["set", name, "AppStderrRotation", "1"]);
     let _ = run_nssm(&["set", name, "AppRotateFiles", "10"]);
+    
+    // Configure service to run for all users (SYSTEM account)
+    // Set service to run as LocalSystem account which has full system access
+    let _ = run_sc(&["config", name, "obj=", "LocalSystem"]);
+    let _ = run_sc(&["config", name, "type=", "own"]);
     
     Ok(())
 }

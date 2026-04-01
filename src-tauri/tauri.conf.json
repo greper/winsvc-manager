@@ -39,7 +39,7 @@
       "nsis": {
         "installerIcon": "icons/icon.ico",
         "languages": ["SimpChinese", "English"],
-        "installMode": "both"
+        "installMode": "perMachine"
       }
     }
   },

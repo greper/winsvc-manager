@@ -7,6 +7,7 @@ mod service;
 use commands::*;
 
 fn main() {
+    // Tauri application
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             install_service_cmd,
