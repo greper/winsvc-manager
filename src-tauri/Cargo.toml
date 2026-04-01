@@ -1,6 +1,6 @@
 [package]
 name = "winsvc-manager"
-version = "0.0.1"
+version = "1.0.0"
 description = "Windows Service Manager using NSSM"
 authors = ["you"]
 license = ""
