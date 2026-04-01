@@ -4,9 +4,9 @@
   "version": "1.0.0",
   "identifier": "com.tauri.winsvc-manager",
   "build": {
-    "beforeDevCommand": "npm run dev",
+    "beforeDevCommand": "pnpm dev",
     "devUrl": "http://localhost:5173",
-    "beforeBuildCommand": "npm run build",
+    "beforeBuildCommand": "pnpm build",
     "frontendDist": "../dist"
   },
   "app": {
@@ -45,17 +45,8 @@
       },
       "nsis": {
         "installerIcon": "icons/icon.ico",
-        "languages": [
-          "SimpChinese",
-          "English"
-        ],
-        "installMode": "perMachine",
-        "displayLanguageSelector": false,
-        "oneClick": false,
-        "allowToChangeInstallationDirectory": true,
-        "deleteAppDataOnUninstall": false,
-        "createDesktopShortcut": true,
-        "createStartMenuShortcut": true
+        "languages": ["SimpChinese", "English"],
+        "installMode": "perMachine"
       }
     }
   },
