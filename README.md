@@ -2,6 +2,8 @@
 
 一个基于 Tauri 构建的 Windows 服务管理工具，封装 NSSM (Non-Sucking Service Manager)，提供简洁的图形化界面来管理 Windows 服务。
 
+可视化包装应用成为一个Windows服务，使其后台运行
+
 ## 功能特性
 
 - **服务安装** - 可视化安装 Windows 服务，支持自动解析命令路径和参数
@@ -28,7 +30,7 @@
 
 ### 安装
 
-1. 运行 `winsvc-manager_0.1.0_x64-setup.exe`
+1. 运行 `winsvc-manager_1.x.x_x64-setup.exe`
 2. 按照安装向导完成安装
 3. **以管理员身份运行**（管理 Windows 服务需要管理员权限）
 
