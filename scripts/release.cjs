@@ -36,7 +36,7 @@ function exec(command) {
 function getNextVersion(releaseType) {
   try {
     const args = releaseType ? ['--release-as', releaseType] : [];
-    const output = execSync('npx standard-version --dry-run ' + args.join(' '), {
+    const output = execSync('pnpm exec standard-version --dry-run ' + args.join(' '), {
       encoding: 'utf8',
       stdio: ['ignore', 'pipe', 'ignore']
     });
@@ -84,13 +84,23 @@ async function main() {
   }
   
   // 3. 执行 standard-version
-  console.log('\n🏷️  步骤 3/3: 更新版本号...');
+  console.log('\n🏷️  步骤 3/4: 更新版本号...');
   try {
     const args = releaseType ? ['--release-as', releaseType] : [];
-    await exec('npx standard-version ' + args.join(' '));
+    await exec('pnpm exec standard-version ' + args.join(' '));
     console.log('✅ 版本更新成功！');
   } catch (error) {
     console.error('❌ 版本更新失败');
+    process.exit(1);
+  }
+  
+  // 4. 推送到远程
+  console.log('\n🚀 步骤 4/4: 推送到远程仓库...');
+  try {
+    await exec('git push --follow-tags origin main');
+    console.log('✅ 推送成功！');
+  } catch (error) {
+    console.error('❌ 推送失败，请手动执行: git push --follow-tags origin main');
     process.exit(1);
   }
   

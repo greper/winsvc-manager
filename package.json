@@ -12,8 +12,7 @@
     "release:patch": "node scripts/release.cjs patch",
     "release:minor": "node scripts/release.cjs minor",
     "release:major": "node scripts/release.cjs major",
-    "release:dry": "standard-version --dry-run",
-    "postrelease": "git push --follow-tags origin main"
+    "release:dry": "standard-version --dry-run"
   },
   "dependencies": {
     "@ant-design/icons-vue": "^7.0.1",
