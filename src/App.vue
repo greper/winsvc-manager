@@ -19,8 +19,8 @@
                 <DownOutlined />
               </a-button>
               <template #overlay>
-                <a-menu @click="handleToolMenu">
-                  <a-menu-item key="upgrade-nssm">
+                <a-menu>
+                  <a-menu-item key="upgrade-nssm" @click="handleUpgradeNssm">
                     <span>升级 NSSM</span>
                   </a-menu-item>
                 </a-menu>
@@ -163,10 +163,8 @@ function handleInstallSuccess() {
   loadServices();
 }
 
-async function handleToolMenu({ key }: { key: string }) {
-  if (key === 'upgrade-nssm') {
-    await checkAndUpgradeNssm();
-  }
+async function handleUpgradeNssm() {
+  await checkAndUpgradeNssm();
 }
 
 function showServiceLog(serviceName: string) {
