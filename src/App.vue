@@ -165,16 +165,22 @@ function showServiceLog(serviceName: string) {
 // Expose showServiceLog for child components
 defineExpose({ showServiceLog });
 
-async function checkAndUpgradeNssm() {
+async function checkAndUpgradeNssm(silent = false) {
   try {
     const result = await invoke<{ needs_upgrade: boolean; is_first_install: boolean; running_services_count: number }>('check_nssm_upgrade_cmd');
     
     if (!result.needs_upgrade) {
+      if (!silent) {
+        message.info('NSSM 已是最新版本');
+      }
       return;
     }
     
     if (result.is_first_install) {
       await invoke<{ success: boolean; restarted_services: string[] }>('perform_nssm_upgrade_cmd');
+      if (!silent) {
+        message.success('NSSM 首次安装完成');
+      }
       return;
     }
     
