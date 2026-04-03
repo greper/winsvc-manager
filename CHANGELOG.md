@@ -2,6 +2,39 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.0](https://github.com/greper/winsvc-manager/compare/v1.1.0...v1.2.0) (2026-04-03)
+
+
+### Features
+
+* 添加 silent 参数到 checkAndUpgradeNssm ([3e6f516](https://github.com/greper/winsvc-manager/commit/3e6f516bee907c4dcf51e356b6f69d048b77f4a2))
+* 添加版本获取命令并更新应用标题 ([7a7434f](https://github.com/greper/winsvc-manager/commit/7a7434f1cacc9142c090567fab131493c8416238))
+* 添加工具菜单和 NSSM 升级功能 ([e2f1664](https://github.com/greper/winsvc-manager/commit/e2f16645b11fff1f30ab0fb2ab07cb974be49cca))
+* 添加自定义发布脚本，支持编译检查和版本确认 ([5153377](https://github.com/greper/winsvc-manager/commit/515337797c37ee6d83169d113491ec583522f2ad))
+
+
+### Bug Fixes
+
+* 将升级 NSSM 改为独立按钮，去掉下拉菜单 ([3ceaee5](https://github.com/greper/winsvc-manager/commit/3ceaee5d58b1df4d2952b81561192726cd95181f))
+* 修复发布脚本，移除 postrelease 钩子避免 Ctrl+C 后继续执行 ([d8184b1](https://github.com/greper/winsvc-manager/commit/d8184b1e6525ee149e7fc0bfa030041e2db0d3f3))
+* 修复工具菜单点击无响应问题 ([3a50941](https://github.com/greper/winsvc-manager/commit/3a50941b0cb648fd352d33b3e7b1833bced97f2e))
+* **nssm:** 优化NSSM自动升级被占用的问题 ([cdec0c8](https://github.com/greper/winsvc-manager/commit/cdec0c89ed50fa5f4bf67e6c24828787b8c37bcd))
+
+
+### Performance Improvements
+
+* **ui:** 优化服务列表和日志显示并添加中文语言支持 ([02581cc](https://github.com/greper/winsvc-manager/commit/02581cc662c23917a4201bd2b8bd1cd2dba98d4a))
+
+
+### Documentation
+
+* readme ([31929ad](https://github.com/greper/winsvc-manager/commit/31929addcfc036a24c1b343e3322804a42d9da15))
+
+
+### Refactoring
+
+* 移除停止所有服务按钮 ([7a5d6dd](https://github.com/greper/winsvc-manager/commit/7a5d6ddc889a010ede9964cd4f2c897ff5cf9e0b))
+
 ## [1.1.0](https://github.com/greper/winsvc-manager/compare/v1.0.0...v1.1.0) (2026-04-01)
 
 
