@@ -12,6 +12,20 @@
               <template #icon><PlusOutlined /></template>
               安装新服务
             </a-button>
+            <a-dropdown>
+              <a-button>
+                <template #icon><ToolOutlined /></template>
+                工具
+                <DownOutlined />
+              </a-button>
+              <template #overlay>
+                <a-menu @click="handleToolMenu">
+                  <a-menu-item key="upgrade-nssm">
+                    <span>升级 NSSM</span>
+                  </a-menu-item>
+                </a-menu>
+              </template>
+            </a-dropdown>
             <a-button @click="loadServices">
               <template #icon><ReloadOutlined /></template>
               刷新
@@ -77,7 +91,7 @@
 import { ref, onMounted } from 'vue';
 import { message, Modal } from 'ant-design-vue';
 import zhCNLocale from 'ant-design-vue/es/locale/zh_CN';
-import { ReloadOutlined, PlusOutlined } from '@ant-design/icons-vue';
+import { ReloadOutlined, PlusOutlined, ToolOutlined, DownOutlined } from '@ant-design/icons-vue';
 import { invoke } from '@tauri-apps/api/core';
 import { getVersion } from '@tauri-apps/api/app';
 import ServiceList from './components/ServiceList.vue';
@@ -147,6 +161,12 @@ function showInstallDialog() {
 function handleInstallSuccess() {
   addLog({ time: getTimestamp(), message: '服务安装成功', type: 'success' });
   loadServices();
+}
+
+async function handleToolMenu({ key }: { key: string }) {
+  if (key === 'upgrade-nssm') {
+    await checkAndUpgradeNssm();
+  }
 }
 
 function showServiceLog(serviceName: string) {
