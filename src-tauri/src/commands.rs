@@ -123,6 +123,11 @@ pub async fn check_nssm_upgrade_cmd() -> Result<NssmUpgradeResult, String> {
 }
 
 #[tauri::command]
+pub async fn get_version_cmd() -> Result<String, String> {
+    Ok(env!("CARGO_PKG_VERSION").to_string())
+}
+
+#[tauri::command]
 pub async fn perform_nssm_upgrade_cmd() -> Result<NssmUpgradeDoneResult, String> {
     let restarted = perform_nssm_upgrade()?;
     Ok(NssmUpgradeDoneResult {

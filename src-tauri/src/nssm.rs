@@ -434,6 +434,8 @@ pub fn check_nssm_upgrade_needed() -> Result<NssmUpgradeStatus, String> {
         return Err("Bundled nssm.exe not found".to_string());
     }
 
+    // return  Ok(NssmUpgradeStatus::UpgradeNeeded);
+
     let bundled_md5 = compute_md5(&bundled_nssm)?;
 
     if !target_nssm.exists() {

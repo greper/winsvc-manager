@@ -78,14 +78,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { PlusOutlined, ReloadOutlined, ToolOutlined } from '@ant-design/icons-vue';
+import { invoke } from '@tauri-apps/api/core';
 import { message, Modal } from 'ant-design-vue';
 import zhCNLocale from 'ant-design-vue/es/locale/zh_CN';
-import { ReloadOutlined, PlusOutlined, ToolOutlined } from '@ant-design/icons-vue';
-import { invoke } from '@tauri-apps/api/core';
-import { getVersion } from '@tauri-apps/api/app';
-import ServiceList from './components/ServiceList.vue';
+import { onMounted, ref } from 'vue';
 import InstallDialog from './components/InstallDialog.vue';
+import ServiceList from './components/ServiceList.vue';
 import ServiceLogDialog from './components/ServiceLogDialog.vue';
 import type { ServiceInfo } from './types';
 
@@ -227,13 +226,13 @@ async function checkAndUpgradeNssm(silent = false) {
 
 onMounted(async () => {
   try {
-    appVersion.value = await getVersion();
+    appVersion.value = await invoke('get_version_cmd');
   } catch {
     appVersion.value = '1.0.0';
   }
   addLog({ time: getTimestamp(), message: `Windows Service Manager v${appVersion.value} 启动`, type: 'info' });
   await loadServices();
-  await checkAndUpgradeNssm();
+  await checkAndUpgradeNssm(true);
 });
 </script>
 
